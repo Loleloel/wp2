@@ -2,8 +2,8 @@
 #include <unistd.h>
 
 // enums
-typedef enum { WEEK1 = 1, WEEK2, WEEK3, WEEK4, WEEK5 } Week;
-typedef enum { MON = 1, TUE, WED, THU, FRI, SAT, SUN } Day;
+typedef enum { WEEK_1 = 1, WEEK_2, WEEK_3, WEEK_4, WEEK_5 } Week;
+typedef enum { MONDAY = 1, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY } Day;
 
 // function declarations
 void printWeekAndWeekday(Week, Day);
@@ -41,10 +41,10 @@ void clearBuffer() {
 // returns 0 (false) if input is invalid, else 1 (true)
 int checkInput(Week startWeek, Day startDay) {
   // if the startWeek is out of range, enter this if block
-  if (1 > startWeek || 5 < startWeek) {
+  if (WEEK_1 > startWeek || WEEK_5 < startWeek) {
     // if the startDay is also out of range, enter this if block and print error message
     // after error message is printed, return
-    if (1 > startDay || 7 < startDay) {
+    if (MONDAY > startDay || SUNDAY < startDay) {
       puts("invalid");
       return 0;
     }
@@ -52,7 +52,7 @@ int checkInput(Week startWeek, Day startDay) {
     // if the startDay is within range, print this error message and return
     puts("invalid week");
     return 0;
-  } else if (1 > startDay || 7 < startDay) { // if startWeek is OK, but not startDay, enter this if-block and print error message
+  } else if (MONDAY > startDay || SUNDAY < startDay) { // if startWeek is OK, but not startDay, enter this if-block and print error message
     puts("invalid day");
     return 0;
   }
@@ -61,34 +61,37 @@ int checkInput(Week startWeek, Day startDay) {
 }
 
 // function to print the week and weekday to the console
-void printWeekAndWeekday(Week startWeek, Day day) {
+void printWeekAndWeekday(Week week, Day day) {
   // Loop over the weeks starting at the week number entered by the user
-  for (Week w = startWeek; w <= WEEK5; w++) {
+  // stopping at the last element in the enum, in this case WEEK5
+  // since week already is an int, we don't need any 'int i = 0' in the for loop
+  // but instead can use it as the control variable
+  for (; week <= WEEK_5; week++) {
     // loop over the days of the week starting at the day number entered by the user
-    for (Day d = day; d <= SUN; d++) {
-      printf("Week %d, ", w);
+    for (; day <= SUNDAY; day++) {
+      printf("Week %d, ", week);
 
       // switch-case to decide what to print to console
-      switch (d) {
-      case MON:
+      switch (day) {
+      case MONDAY:
         puts("Monday");
         break;
-      case TUE:
+      case TUESDAY:
         puts("Tuesday");
         break;
-      case WED:
+      case WEDNESDAY:
         puts("Wednesday");
         break;
-      case THU:
+      case THURSDAY:
         puts("Thursday");
         break;
-      case FRI:
+      case FRIDAY:
         puts("Friday");
         break;
-      case SAT:
+      case SATURDAY:
         puts("Saturday");
         break;
-      case SUN:
+      case SUNDAY:
         puts("Sunday");
         break;
       default:
@@ -99,7 +102,7 @@ void printWeekAndWeekday(Week startWeek, Day day) {
       sleep(1); // add 1 second delay
     }
 
-    // reset startDay to start at the Monday when the next week begins
-    day = MON;
+    // reset day to start at the Monday when the next week begins
+    day = MONDAY;
   }
 }
