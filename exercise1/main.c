@@ -5,7 +5,6 @@
 
 // Enums
 typedef enum { NORTH, EAST, SOUTH, WEST } Directions;
-typedef enum { MOVE, TURN } Action;
 
 // Coordinates struct
 typedef struct {
@@ -28,28 +27,34 @@ int main(void) {
   Robot robot = {-1, -1, NORTH};
   char instructions[10];
 
-  readInitialCoords(&robot);
-  readInstructionsInput(instructions);
+  while (1) {
+    readInitialCoords(&robot);
+    readInstructionsInput(instructions);
 
-  printf("Position before instructions: x: %d, y: %d\n\n", robot.xPos, robot.yPos);
+    printf("Position before instructions: x: %d, y: %d\n\n", robot.xPos, robot.yPos);
 
-  for (int i = 0; i < strlen(instructions); i++) {
-    switch (instructions[i]) {
-      case 'm':
-        move(&robot);
-        break;
-      case 't':
-        turn(&robot);
-        break;
-      default:
-        puts("Mistake somewhere");
-        exit(1);
+    // iterate over the instructions
+    for (int i = 0; i < strlen(instructions); i++) {
+      // check the value of instructions[i]
+      switch (instructions[i]) {
+        case 'm': // move robot in the direction it's currently facing
+          move(&robot);
+          break;
+        case 't': // turn robot 90 degrees clockwise
+          turn(&robot);
+          break;
+        default: // catchall in case of terrible terrible things
+          puts("Mistake somewhere");
+          exit(1); // exit program with exit code 1
+      }
+
+      sleep(1); // 1 second delay
     }
 
-    sleep(1);
+    printf("\nFinal position: x: %d, y: %d\n", robot.xPos, robot.yPos);
+    clearInputBuffer();
   }
 
-  printf("\nFinal position: x: %d, y: %d\n", robot.xPos, robot.yPos);
 
   return 0;
 }
@@ -119,13 +124,21 @@ void readInitialCoords(Robot *robot) {
   do {
     printf("Enter the starting x coordinate (0-99) or 'q' to exit: ");
     inputOk = scanf("%3d", &robot->xPos);
-    ch = getchar();
 
-    if ('q' == ch) {
+    /* If a user entered a char, then scanf will return 0.
+     * In these cases, scanf does not consume the char from stdin
+     * so we can peek with getchar.
+     * If ch == 'q', we exit the program, and if not, we have to 
+     * push the char stored in ch back into stdin with ungetc. 
+     * If we do not ungetc the ch, then we get undefined behavior
+     * if a user enters either a valid int, as well as other invalid input */
+
+    ch = getchar(); // gets the next char from stdin, and stores it in the variable ch
+    if ('q' == ch) { // if 'q' == ch, write message to user
       puts("Exiting...");
-      exit(0);
+      exit(0); // exit program with exit code 0
     } else {
-      ungetc(ch, stdin);
+      ungetc(ch, stdin); // push ch back into stdin to avoid undefined behavior
     }
 
     clearInputBuffer(); //  clear the input buffer of any remaining chars
@@ -135,13 +148,14 @@ void readInitialCoords(Robot *robot) {
   do {
     printf("\nEnter the starting y coordinate (0-99) or 'q' to exit: ");
     inputOk = scanf("%3d", &robot->yPos);
-    ch = getchar();
 
+    // same case here as above
+    ch = getchar();
     if ('q' == ch) {
       puts("Exiting...");
-      exit(0);
+      exit(0); // exit the program with code 0
     } else {
-      ungetc(ch, stdin);
+      ungetc(ch, stdin); // push ch back into stdin
     }
 
     clearInputBuffer(); //  clear the input buffer of any remaining chars
@@ -159,16 +173,21 @@ void readInstructionsInput(char *instructions) {
 
 // function to validate the instructions input
 // ensuring the input is 't' or 'm'
+// Returns either 0 (false) if invalid instructions are passed
+// or 1 (true) if input is valid
 int validateInstructionsInput(char *instructions) {
+  // if 'q' == instructions[0], then print error message to user
   if ('q' == instructions[0]) {
     puts("Exiting...");
-    exit(0);
+    exit(0); // exit program with exit code 0
   }
 
+  // iterate over the instructions
   for (int i = 0; i < strlen(instructions); i++) {
+    // ensure the instructions are valid ('m' = move, 't' = turn)
     if (instructions[i] != 'm' && instructions[i] != 't') {
       puts("Invalid instruction in string. Please ensure the instructions contain only 'm' and 't'.");
-      return 0;
+      return 0; // if invalid, return 0 (false)
     }
   }
 
