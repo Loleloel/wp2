@@ -113,18 +113,37 @@ void turn(Robot *robot) {
 // returns a struct with integer values stored to the x and y fields
 void readInitialCoords(Robot *robot) {
   int inputOk;
+  char ch;
 
   // prompt for the starting x coordinate until a valid coord is provided
   do {
-    printf("Enter the starting x coordinate (0-99): ");
+    printf("Enter the starting x coordinate (0-99) or 'q' to exit: ");
     inputOk = scanf("%3d", &robot->xPos);
+    ch = getchar();
+
+    if ('q' == ch) {
+      puts("Exiting...");
+      exit(0);
+    } else {
+      ungetc(ch, stdin);
+    }
+
     clearInputBuffer(); //  clear the input buffer of any remaining chars
   } while (!validateCoordInput(inputOk, robot->xPos)); // keep looping until a valid x coord is provided
 
   // prompt for the starting y coordinate until a valid one is provided
   do {
-    printf("\nEnter the starting y coordinate (0-99): ");
+    printf("\nEnter the starting y coordinate (0-99) or 'q' to exit: ");
     inputOk = scanf("%3d", &robot->yPos);
+    ch = getchar();
+
+    if ('q' == ch) {
+      puts("Exiting...");
+      exit(0);
+    } else {
+      ungetc(ch, stdin);
+    }
+
     clearInputBuffer(); //  clear the input buffer of any remaining chars
   } while (!validateCoordInput(inputOk, robot->yPos)); // keep looping until a valid y coord is provided
 }
@@ -132,7 +151,7 @@ void readInitialCoords(Robot *robot) {
 // function to read the instructions input
 void readInstructionsInput(char *instructions) {
   do {
-  printf("Please give the robot some instructions (m for more, t for turn): ");
+  printf("Please give the robot some instructions (m for more, t for turn) or 'q' to exit: ");
   scanf("%10s", instructions); // read a 10 char string to the instructions variable
 
   } while (!validateInstructionsInput(instructions));
@@ -141,6 +160,11 @@ void readInstructionsInput(char *instructions) {
 // function to validate the instructions input
 // ensuring the input is 't' or 'm'
 int validateInstructionsInput(char *instructions) {
+  if ('q' == instructions[0]) {
+    puts("Exiting...");
+    exit(0);
+  }
+
   for (int i = 0; i < strlen(instructions); i++) {
     if (instructions[i] != 'm' && instructions[i] != 't') {
       puts("Invalid instruction in string. Please ensure the instructions contain only 'm' and 't'.");
@@ -153,7 +177,8 @@ int validateInstructionsInput(char *instructions) {
 
 // function to clear the input buffer until a newline char is encountered
 void clearInputBuffer(void) {
-  while (getchar() != '\n') {
+  int ch;
+  while ((ch = getchar() != '\n' && ch != EOF)) {
     continue;
   }
 }

@@ -14,9 +14,9 @@ int main(void) {
   Week startWeek;
   Weekday startDay;
 
-  scanf("%1d", &startWeek); // read the starting week
+  scanf("%d", &startWeek); // read the starting week
   clearBuffer();            // clear the buffer of any remaining chars
-  scanf("%1d", &startDay);  // read the starting day
+  scanf("%d", &startDay);  // read the starting day
 
   checkInput(startWeek, startDay); // check for valid input
   printWeekAndWeekday(startWeek, startDay); // print the week and weekdays to console
