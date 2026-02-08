@@ -11,12 +11,11 @@ int main(void) {
 
     // iterate over each instruction with a pointer to each
     // char in the string of instructions
-    for (char *p = instructions; *p; p++) {
+    for (char *p = instructions; *p && robot.isAlive; p++) {
       // move or turn the robot based on the current instruction
       if ('m' == *p) move(&robot);
       else if ('t' == *p) turn(&robot);
 
-      if (!robot.isAlive) break;
       sleep(1); // 1 second delay
     }
 
