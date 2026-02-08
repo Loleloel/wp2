@@ -11,26 +11,17 @@ int main(void) {
     readInstructionsInput(instructions); // prompt the user for instructions
     drawGrid(&robot); // draw the robot's starting position at each instructions prompt
 
-    // iterate over the instructions with a pointer
-    for (char *p = instructions; *p; p++) {
-      // check the value of the instruction the pointer is currently
-      // pointing to
-      switch (*p) {
-      case 'm': // move robot in the direction it's currently facing
-        move(&robot);
-        break;
-      case 't': // turn robot 90 degrees clockwise
-        turn(&robot);
-        break;
-      default: // catchall in case of terrible terrible things
-        printf("Something went wrong, could not move or turn.\n");
-        exit(1); // exit program with exit code 1
-      }
+    // iterate over the instructions with a pointer until
+    // there either are no more instructions in the instructions
+    // string, or the robot went out of bounds.
+    for (char *p = instructions; *p && robot.isAlive; p++) {
+      // Move or turn the robot based on the the current instruction
+      // pointed to by p
+      if ('m' == *p) move(&robot);
+      else if ('t' == *p) turn(&robot);
 
       sleep(1); // 1 second delay
       drawGrid(&robot); // draw the updated grid
-
-      if (!robot.isAlive) break; // if the robot goes out of bounds, break the loop
     }
 
     // print the robot's current coords if it's still alive
