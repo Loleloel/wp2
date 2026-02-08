@@ -11,8 +11,6 @@ int main(void) {
     readInstructionsInput(instructions);
     ptrInstruction = &instructions[0];
 
-    // init the robot's alive and direction at the start of the loop
-
     // iterate over the instructions
     do {
       // check the value of instructions[i]
