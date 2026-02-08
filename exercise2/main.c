@@ -151,7 +151,7 @@ void readInstructionsInput(char *instructions) {
 /* Function to validate the coordinate input.
  * Both the input type and the range is validated to ensure
  * the input entered by the user is OK. */
-int validateCoordInput(int inputOk, int coord) {
+int validateCoordInput(const int inputOk, const int coord) {
   if (!inputOk) { // input is not an integer
     puts("Invalid input. Please ensure the coordinate is an integer between 0 "
          "and 99.");
@@ -200,7 +200,7 @@ int validateInstructionsInput(char *instructions) {
 /* Function to draw the grid to the console.
  * The drawing uses dots '.' to represent each cell.
  * The address of the robot is passed as an argument.*/
-void drawGrid(Robot *robot) {
+void drawGrid(const Robot *robot) {
   system("clear"); // clear the console output
 
   // iterate over all rows in the grid
@@ -225,7 +225,7 @@ void drawGrid(Robot *robot) {
  * Prints the robot as an "arrow-like" symbol based
  * on its current direction. 
  * Takes the robot's direction as an argument. */
-void drawRobot(int robotDirection) {
+void drawRobot(const int robotDirection) {
   // represent the robot with different "arrow-like" symbols
   // to show the robot's current facing direction
   switch (robotDirection) {
