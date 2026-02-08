@@ -4,30 +4,21 @@
 int main(void) {
   Robot robot = {-1, -1, 1, NORTH};
   char instructions[11];
-  char *ptrInstruction;
 
   while (1) {
-    readInitialCoords(&robot);
-    readInstructionsInput(instructions);
-    ptrInstruction = &instructions[0];
+    readInitialCoords(&robot); // read coordinates from the user
+    readInstructionsInput(instructions); // read instructions to the robot from the user
 
-    // iterate over the instructions
-    do {
-      // check the value of instructions[i]
-      switch (*ptrInstruction) {
-      case 'm': // move robot in the direction it's currently facing
-        move(&robot);
-        break;
-      case 't': // turn robot 90 degrees clockwise
-        turn(&robot);
-        break;
-      default: // catchall in case of terrible terrible things
-        printf("%c\n", *ptrInstruction);
-        exit(1); // exit program with exit code 1
-      }
+    // iterate over each instruction with a pointer to each
+    // char in the string of instructions
+    for (char *p = instructions; *p; p++) {
+      // move or turn the robot based on the current instruction
+      if ('m' == *p) move(&robot);
+      else if ('t' == *p) turn(&robot);
 
+      if (!robot.isAlive) break;
       sleep(1); // 1 second delay
-    } while (*++ptrInstruction && robot.isAlive);
+    }
 
     // if the robot died (went out of bounds), print a message to the user
     if (!robot.isAlive) {
