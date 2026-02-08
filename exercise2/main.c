@@ -4,7 +4,6 @@
 int main(void) {
   Robot robot = {-1, -1, 1, NORTH};
   char instructions[11];
-  char *p;
   readInitialCoords(&robot);
 
   while (robot.isAlive) {
