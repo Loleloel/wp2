@@ -1,121 +1,127 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-// Enums
-typedef enum { NORTH, EAST, SOUTH, WEST } Directions;
-
-// Coordinates struct
-typedef struct {
-  int xPos;
-  int yPos;
-  Directions directions;
-} Robot;
-
-// Function declarations
-void move(Robot *robot);
-void turn(Robot *robot);
-void readInitialCoords(Robot *robot);
-void readInstructionsInput(char *);
-int validateInstructionsInput(char *);
-int validateCoordInput(int inputOk, int coord);
-void clearInputBuffer(void);
+#include "main.h"
 
 // main function
 int main(void) {
-  Robot robot = {-1, -1, NORTH};
-  char instructions[10];
+  Robot robot = {-1, -1, 1, NORTH};
+  char instructions[11];
+  char *ptrInstruction;
 
   while (1) {
     readInitialCoords(&robot);
     readInstructionsInput(instructions);
+    ptrInstruction = &instructions[0];
 
-    printf("Position before instructions: x: %d, y: %d\n\n", robot.xPos, robot.yPos);
+    // init the robot's alive and direction at the start of the loop
 
     // iterate over the instructions
-    for (int i = 0; i < strlen(instructions); i++) {
+    do {
       // check the value of instructions[i]
-      switch (instructions[i]) {
-        case 'm': // move robot in the direction it's currently facing
-          move(&robot);
-          break;
-        case 't': // turn robot 90 degrees clockwise
-          turn(&robot);
-          break;
-        default: // catchall in case of terrible terrible things
-          puts("Mistake somewhere");
-          exit(1); // exit program with exit code 1
+      switch (*ptrInstruction) {
+      case 'm': // move robot in the direction it's currently facing
+        move(&robot);
+        break;
+      case 't': // turn robot 90 degrees clockwise
+        turn(&robot);
+        break;
+      default: // catchall in case of terrible terrible things
+        printf("%c\n", *ptrInstruction);
+        exit(1); // exit program with exit code 1
       }
 
       sleep(1); // 1 second delay
+    } while (*++ptrInstruction && robot.isAlive);
+
+    // if the robot died (went out of bounds), print a message to the user
+    if (!robot.isAlive) {
+      puts("The robot fell off the map, it's extremely dead.\n");
+    } else { // otherwise, print the current coords of the robot
+      printf("\nFinal position: x: %d, y: %d\n", robot.xPos, robot.yPos);
     }
 
-    printf("\nFinal position: x: %d, y: %d\n", robot.xPos, robot.yPos);
+    // clear the input buffer to prepare for the next round of inputs
     clearInputBuffer();
-  }
 
+    // init the isAlive fields, as well as the directions field of the robot
+    robot.isAlive = 1;
+    robot.directions = NORTH;
+  }
 
   return 0;
 }
 
 // ---------------- ROBOT ACTIONS ----------------
 
-// function to move the robot one step in the direction
-// the robot is current facing
+/* Function to move the robot one step in the direction
+ * the robot is current facing.
+ * Takes the robot's address as an argument. */
 void move(Robot *robot) {
   switch (robot->directions) { // switch on the robot's current direction
-    case NORTH: // robot is facing north
-      robot->yPos += 1; // move robot 1 step up in the y axis
-      puts("Moving north 1 step");
-      break;
-    case SOUTH: // robot is facing south
-      robot->yPos -= 1; // move robot 1 step down in the y axis
-      puts("Moving south 1 step");
-      break;
-    case EAST: // robot is facing east
-      robot->xPos += 1; // move robot 1 step up in the x axis
-      puts("Moving east 1 step");
-      break;
-    case WEST: // robot is facing west
-      robot->xPos -= 1; // move robot 1 step down in the x axis
-      puts("Moving west 1 step");
-      break;
-    default: // catchall if something goes terribly wrong
-      puts("Error: Invalid direction");
-      exit(1);
+  case NORTH:                  // robot is facing north
+    robot->yPos--;             // move robot 1 step up in the y axis
+    robot->isAlive = 0 <= robot->yPos;
+    puts("Moving one step north.");
+    break;
+  case SOUTH:      // robot is facing south
+    robot->yPos++; // move robot 1 step down in the y axis
+    robot->isAlive = 100 > robot->yPos;
+    puts("Moving one step south.");
+    break;
+  case EAST:       // robot is facing east
+    robot->xPos++; // move robot 1 step up in the x axis
+    robot->isAlive = 100 > robot->xPos;
+    puts("Moving one step east.");
+    break;
+  case WEST:       // robot is facing west
+    robot->xPos--; // move robot 1 step down in the x axis
+    robot->isAlive = 0 <= robot->xPos;
+    puts("Moving one step west.");
+    break;
+  default: // catchall if something goes terribly wrong
+    puts("Error: Invalid direction");
+    exit(1);
   }
 }
 
-// function to turn the robot 90 degrees clockwise
+/* Function to turn the robot 90 degrees clockwise
+ * by incrementing the value.
+ * Wrap-around when the robot's directions is WEST by
+ * subtracting 3 to set it to NORTH again.
+ * Takes the address of the robot as an argument. */
 void turn(Robot *robot) {
   switch (robot->directions) { // switch on the robot's current direction
-    case NORTH: // robot is facing north
-      robot->directions++; // increment direction to the next direction as defined in the Directions enum
-      puts("Turning east.");
-      break;
-    case EAST:
-      robot->directions++; // increment direction to the next direction as defined in the Directions enum
-      puts("Turning south.");
-      break;
-    case SOUTH:
-      robot->directions++; // increment direction to the next direction as defined in the Directions enum
-      puts("Turning west.");
-      break;
-    case WEST:
-      robot->directions -= 3; // subtract 3 from direction to set it to the first defined direction in the Directions enum
-      puts("Turning north.");
-      break;
-    default: // catchall if something goes terribly wrong
-      puts("Something went wrong");
-      exit(1);
+  case NORTH:                  // robot is facing north
+    robot->directions++; // increment direction to the next direction as defined
+                         // in the Directions enum
+    puts("Turning to the east.");
+    break;
+  case EAST:
+    robot->directions++; // increment direction to the next direction as defined
+                         // in the Directions enum
+    puts("Turning to the south.");
+    break;
+  case SOUTH:
+    robot->directions++; // increment direction to the next direction as defined
+                         // in the Directions enum
+    puts("Turning to the west.");
+    break;
+  case WEST:
+    robot->directions -= 3; // subtract 3 from direction to set it to the first
+                            // defined direction in the Directions enum
+    puts("Turning to the north.");
+    break;
+  default: // catchall if something goes terribly wrong
+    puts("Something went wrong");
+    exit(1);
   }
 }
 
-// ---------------- INPUT AND INPUT VALIDATION -------------------
+// ---------------- INPUT READING -------------------
 
-// function to read the initial coordinates of the robot
-// returns a struct with integer values stored to the x and y fields
+/* Function to read the initial coordinates of the robot.
+ * Sets the xPos and yPos fields with coords between 0-99
+ * entered by a user.
+ * If a user enters 'q', the program exits with exit code 0.
+ * Takes the address of the robot as an argument. */
 void readInitialCoords(Robot *robot) {
   int inputOk;
   char ch;
@@ -127,83 +133,50 @@ void readInitialCoords(Robot *robot) {
 
     /* If a user entered a char, then scanf will return 0.
      * In these cases, scanf does not consume the char from stdin
-     * so we can peek with getchar.
-     * If ch == 'q', we exit the program, and if not, we have to 
-     * push the char stored in ch back into stdin with ungetc. 
-     * If we do not ungetc the ch, then we get undefined behavior
-     * if a user enters either a valid int, as well as other invalid input */
+     * so we can take a peek with getchar() and ungetc(char, stream).
+     * The exact implementation is shown further down in the
+     * peekInputBuffer() function.*/
 
-    ch = getchar(); // gets the next char from stdin, and stores it in the variable ch
-    if ('q' == ch) { // if 'q' == ch, write message to user
-      puts("Exiting...");
-      exit(0); // exit program with exit code 0
-    } else {
-      ungetc(ch, stdin); // push ch back into stdin to avoid undefined behavior
-    }
-
-    clearInputBuffer(); //  clear the input buffer of any remaining chars
-  } while (!validateCoordInput(inputOk, robot->xPos)); // keep looping until a valid x coord is provided
+    if (!inputOk)
+      peekInputBuffer(); // peek the input buffer if input was not OK
+    clearInputBuffer();  //  clear the input buffer of any remaining chars
+  } while (!validateCoordInput(
+      inputOk, robot->xPos)); // keep looping until a valid x coord is provided
 
   // prompt for the starting y coordinate until a valid one is provided
   do {
     printf("\nEnter the starting y coordinate (0-99) or 'q' to exit: ");
     inputOk = scanf("%3d", &robot->yPos);
 
-    // same case here as above
-    ch = getchar();
-    if ('q' == ch) {
-      puts("Exiting...");
-      exit(0); // exit the program with code 0
-    } else {
-      ungetc(ch, stdin); // push ch back into stdin
-    }
-
-    clearInputBuffer(); //  clear the input buffer of any remaining chars
-  } while (!validateCoordInput(inputOk, robot->yPos)); // keep looping until a valid y coord is provided
+    if (!inputOk)
+      peekInputBuffer(); // peek the input buffer if input was not OK
+    clearInputBuffer();  //  clear the input buffer of any remaining chars
+  } while (!validateCoordInput(
+      inputOk, robot->yPos)); // keep looping until a valid y coord is provided
 }
 
-// function to read the instructions input
+/* Function to read the instructions to the robot from the user.
+ * The user will enter a string containing only 'm' and 't'.
+ * As with the coordinates, 'q' is also acceptable, but exits the
+ * program with exit code 0.
+ * 'm' will instruct the robot to move, 't' will instruct the robot
+ * to turn. */
 void readInstructionsInput(char *instructions) {
   do {
-  printf("Please give the robot some instructions (m for more, t for turn) or 'q' to exit: ");
-  scanf("%10s", instructions); // read a 10 char string to the instructions variable
-
+    printf("Please give the robot some instructions (m for more, t for turn) "
+           "or 'q' to exit: ");
+    scanf("%10s",
+          instructions); // read a 10 char string to the instructions variable
+                         // the instructions string does have a size of 11 to
+                         // ensure the null terminator being included.
   } while (!validateInstructionsInput(instructions));
 }
 
-// function to validate the instructions input
-// ensuring the input is 't' or 'm'
-// Returns either 0 (false) if invalid instructions are passed
-// or 1 (true) if input is valid
-int validateInstructionsInput(char *instructions) {
-  // if 'q' == instructions[0], then print error message to user
-  if ('q' == instructions[0]) {
-    puts("Exiting...");
-    exit(0); // exit program with exit code 0
-  }
+// ---------------- INPUT VALIDATION -------------------
 
-  // iterate over the instructions
-  for (int i = 0; i < strlen(instructions); i++) {
-    // ensure the instructions are valid ('m' = move, 't' = turn)
-    if (instructions[i] != 'm' && instructions[i] != 't') {
-      puts("Invalid instruction in string. Please ensure the instructions contain only 'm' and 't'.");
-      return 0; // if invalid, return 0 (false)
-    }
-  }
-
-  return 1;
-}
-
-// function to clear the input buffer until a newline char is encountered
-void clearInputBuffer(void) {
-  int ch;
-  while ((ch = getchar() != '\n' && ch != EOF)) {
-    continue;
-  }
-}
-
-// function to validate the coordinate input.
-// validation on both input type and the range of the input.
+/* Function to validate the coordinate input.
+ * Both the input type and the range is validated to ensure
+ * the input entered by the user is OK. */
 int validateCoordInput(int inputOk, int coord) {
   if (!inputOk) { // input is not an integer
     puts("Invalid input. Please ensure the coordinate is an integer between 0 "
@@ -216,4 +189,64 @@ int validateCoordInput(int inputOk, int coord) {
   }
 
   return 1;
+}
+
+/* Function to validate the instructions input.
+ * We check if the instructions string contains valid
+ * instruction letters ('m' and 't') or any 'q' to exit
+ * the program.
+ * Returns 0 (false) if invalid instructions are passed.
+ * Returns 1 (true) if the instructions are valid.*/
+int validateInstructionsInput(char *instructions) {
+  // use a pointer to the first element in the instructions
+
+  // iterate over the instructions one at a time using a pointer
+  for (char *p = instructions; *p; p++) {
+    // first check if the instruction == 'q', and if it does, exit the program.
+    // if not, check if the instruction is valid ('m' = move, 't' = turn)
+    switch (*p) {
+    case 'q': // exit program
+      puts("Exiting...");
+      exit(0);
+    case 'm': // move instruction, fallthrough to case 't'
+    case 't': // turn instruction, continue loop
+      continue;
+    default: // invalid input, print error message and return 0 (false)
+      puts("Error: Invalid instruction in string.");
+      puts("Please ensure the instructions contain only 'm' and 't'. ('q' to "
+           "quit)\n");
+      return 0;
+    }
+  }
+
+  return 1; // return 1 (true) if all is well
+}
+
+// ---------------- UTILS -------------------
+
+// function to clear the input buffer until a newline char is encountered
+void clearInputBuffer(void) {
+  int ch;
+  while ((ch = getchar()) != '\n' && ch != EOF) {
+    continue;
+  }
+}
+
+/* Function to peek the input buffer (stdin).
+ * Used with the readInitialCoords as the scanf expects
+ * a decimal. Since the user can enter 'q' to exit the program,
+ * we must peek the buffer to check this, as scanf doesn't
+ * consume from stdin if invalid input is passed.
+ * If the char in stdin == 'q', exit the program with exit code 0.
+ * If not, push the fetched char back to stdin to avoid
+ * unwanted behavior. */
+void peekInputBuffer(void) {
+  int ch = getchar();
+
+  if ('q' == ch) {
+    puts("Exiting...");
+    exit(0); // exit the program with code 0
+  } else {
+    ungetc(ch, stdin); // push ch back into stdin
+  }
 }
