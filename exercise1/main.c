@@ -7,14 +7,17 @@ int main(void) {
 
   while (1) {
     readInitialCoords(&robot); // read coordinates from the user
-    readInstructionsInput(instructions); // read instructions to the robot from the user
+    readInstructionsInput(
+        instructions); // read instructions to the robot from the user
 
     // iterate over each instruction with a pointer to each
     // char in the string of instructions
     for (char *p = instructions; *p && robot.isAlive; p++) {
       // move or turn the robot based on the current instruction
-      if ('m' == *p) move(&robot);
-      else if ('t' == *p) turn(&robot);
+      if ('m' == *p)
+        move(&robot);
+      else if ('t' == *p)
+        turn(&robot);
 
       sleep(1); // 1 second delay
     }
@@ -165,7 +168,7 @@ void readInstructionsInput(char *instructions) {
 /* Function to validate the coordinate input.
  * Both the input type and the range is validated to ensure
  * the input entered by the user is OK. */
-int validateCoordInput(int inputOk, int coord) {
+int validateCoordInput(const int inputOk, const int coord) {
   if (!inputOk) { // input is not an integer
     puts("Invalid input. Please ensure the coordinate is an integer between 0 "
          "and 99.");

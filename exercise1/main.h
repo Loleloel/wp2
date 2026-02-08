@@ -21,7 +21,7 @@ void move(Robot *robot);
 void turn(Robot *robot);
 void readInitialCoords(Robot *robot);
 void readInstructionsInput(char *);
-int validateCoordInput(int inputOk, int coord);
+int validateCoordInput(const int inputOk, const int coord);
 int validateInstructionsInput(char *);
 void clearInputBuffer(void);
 void peekInputBuffer(void);
