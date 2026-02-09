@@ -13,20 +13,22 @@ typedef struct listNode {
 } REGTYPE;
 
 REGTYPE* randomList(void);
+REGTYPE* addFirst(REGTYPE *head, int data);
+void printLinkedList(REGTYPE *head, REGTYPE *currentNode);
 
 int main(void) {
-  int num = 1;
-
   srandom(time(NULL)); // random seed
 
   REGTYPE *head = randomList(); // declare and assign a head of our linked list
   REGTYPE *currentNode = head; // declare and assign the currentNode to be a pointer to head
 
-  // loop as long as currentNode has a valid value
-  while (currentNode != NULL) {
-    printf("Post number: %d : %d\n", num++, currentNode->number);
-    currentNode = currentNode->next; // set currentNode to point to the next node
-  }
+  printLinkedList(head, currentNode);
+
+  puts("Inserting new node to the front.");
+  head = addFirst(head, 123); // pass a value larger than 100 for demonstration purposes
+  currentNode = head;
+
+  printLinkedList(head, currentNode);
 
   /* To free up the memory, loop for as long as currentNode has a valid value
    * after assigning it the pointer to the list's head again. */
@@ -78,3 +80,33 @@ REGTYPE* randomList(void) {
 
   return head; // return the head only, as the other nodes are accessible through the head-node
 }
+
+/* Function to insert a new node in the linked list to the front of it.
+ * Returns the address of the new node. */
+REGTYPE* addFirst(REGTYPE *head, int data) {
+  REGTYPE* newFirstNode = malloc(sizeof(*newFirstNode)); // allocate memory of the new node
+
+  // if memory allocation failed, print error message and exit program with exit code 1.
+  if (!newFirstNode) {
+    puts("Error: Memory allocation failed.");
+    exit(1);
+  }
+
+  newFirstNode->prev = NULL; // since newFirstNode will be the new head, set its prev field to NULL
+  newFirstNode->next = head; // assign the next field of newFirstNode to point to the current head
+  newFirstNode->number = data; // assign the number field of newFirstNode the value of data
+  head->prev = newFirstNode; // ensure the head's prev field also points to the new head (newFirstNode)
+
+  return newFirstNode; // return the address of the newFirstNode
+}
+
+void printLinkedList(REGTYPE *head, REGTYPE *currentNode) {
+  int num = 1;
+
+  // loop as long as currentNode has a valid value
+  while (currentNode != NULL) {
+    printf("Post number: %d : %d\n", num++, currentNode->number);
+    currentNode = currentNode->next; // set currentNode to point to the next node
+  }
+}
+
